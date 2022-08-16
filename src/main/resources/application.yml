@@ -1,5 +1,6 @@
 server:
   port: 8399
+
 spring:
   liquibase:
     user: postgres
@@ -9,7 +10,8 @@ spring:
     url: "jdbc:postgresql://localhost:5432/postgres?currentSchema=public"
     username: postgres
     password: 123
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    show-sql: true
+
+internal:
+  cars:
+    max-year: ${INTERNAL_CARS_MAX_YEAR:10}
+    offset: ${INTERNAL_CARS_OFFSET:5}

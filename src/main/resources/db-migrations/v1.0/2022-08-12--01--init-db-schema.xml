@@ -1,0 +1,171 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="2022-08-12--01--init-db-schema.xml" author="morozzov">
+
+        <createTable tableName="cars">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="color" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="number" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="car_class" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="drivers">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="first_name" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="second_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="license_number" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="driving_exp" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="terminated" type="BOOL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="car_id" type="UUID">
+                <constraints foreignKeyName="fk_car_id" nullable="false" references="cars(id)"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="clients">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="first_name" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="second_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="int8">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="tariffs">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mile_price" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coef" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_wait_price" type="double">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="price_strategies">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority_class" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="wait_time_price" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tariff_id" type="UUID">
+                <constraints foreignKeyName="fk_tariff_id" nullable="false" references="tariffs(id)"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="rates">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate" type="int8"/>
+            <column name="rate_details" type="varchar(30)"/>
+            <column name="ext_feedback" type="TEXT"/>
+        </createTable>
+
+        <createTable tableName="orders">
+            <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="driver_id" type="UUID">
+                <constraints foreignKeyName="fk_driver_id" nullable="false" references="drivers(id)"/>
+            </column>
+            <column name="client_id" type="UUID">
+                <constraints foreignKeyName="fk_client_id" nullable="false" references="clients(id)"/>
+            </column>
+            <column name="price_strategy_id" type="UUID">
+                <constraints foreignKeyName="fk_price_strategy_id" nullable="false" references="price_strategies(id)"/>
+            </column>
+            <column name="rate_id" type="UUID">
+                <constraints foreignKeyName="fk_rate_id" nullable="false" references="rates(id)"/>
+            </column>
+            <column name="status" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+    </changeSet>
+</databaseChangeLog>
