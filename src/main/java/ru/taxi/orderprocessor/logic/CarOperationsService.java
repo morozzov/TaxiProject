@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.taxi.orderprocessor.dao.CarOperationsRepository;
-import ru.taxi.orderprocessor.dto.CreateCarDto;
+import ru.taxi.orderprocessor.dto.CarCreateUpdateOperationDto;
+import ru.taxi.orderprocessor.dto.CarDto;
 import ru.taxi.orderprocessor.entity.CarEntity;
 import ru.taxi.orderprocessor.enums.PriorityClass;
 import ru.taxi.orderprocessor.mapper.CarMapper;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -26,20 +28,39 @@ public class CarOperationsService {
     @Value("${internal.cars.offset}")
     private Integer offset;
 
-    public CarEntity create(CreateCarDto dto) {
+    public CarDto create(CarCreateUpdateOperationDto dto) {
         log.debug("create.in - dto: {}", dto);
         var carEntity = mapper.dtoToEntity(dto);
-
         PriorityClass priorityClass = doCalculateClass(dto);
         carEntity.setPriorityClass(priorityClass);
         log.info("create.in - calculated priority class: {}", priorityClass);
         var createdCar = repository.save(carEntity);
         log.info("create.out - created car_entity with id: {}", createdCar.getId());
-        log.debug("create.out - response: {}", createdCar);
-        return null;
+        var carDto = mapper.entityToDto(createdCar);
+        log.debug("create.out - response: {}", carDto);
+        return carDto;
     }
 
-    private PriorityClass doCalculateClass(CreateCarDto dto) {
+    public CarDto update(CarCreateUpdateOperationDto dto) {
+        log.debug("update.in - dto: {}", dto);
+        String stateNumber = dto.getStateNumber();
+        var carEntity = repository.findByNumber(stateNumber).orElseThrow(() ->{
+            throw new EntityNotFoundException(String.format("Car with number %s not found in repository", stateNumber));
+        });
+        log.info("update.in - found car record with number: {}", stateNumber);
+        var entityUpdated = mapper.updateFromDto(dto, carEntity);
+
+        PriorityClass priorityClass = doCalculateClass(dto);
+        entityUpdated.setPriorityClass(priorityClass);
+
+        var updatedPersisted = repository.save(entityUpdated);
+        log.info("update.in - car record with number {} updated", stateNumber);
+        var updatedPersistedDto = mapper.entityToDto(updatedPersisted);
+        log.debug("update.out - response: {}", updatedPersistedDto);
+        return updatedPersistedDto;
+    }
+
+    private PriorityClass doCalculateClass(CarCreateUpdateOperationDto dto) {
         var between = Period.between(LocalDate.now(), dto.getIssuedAt());
         var carAge =  between.getYears();
         if (carAge > maxYear) {
@@ -49,9 +70,10 @@ public class CarOperationsService {
         PriorityClass rawPriorityClass = PriorityClass.convert(dto.getCarClass());
         Integer downgradesToApply = doCalculateDowngrades(carAge);
 
-        switch (rawPriorityClass) {
-            //todo normal calculate
-        }
+        rawPriorityClass = downgradesToApply > rawPriorityClass.ordinal() ?
+                PriorityClass.values()[0] :
+                PriorityClass.values()[rawPriorityClass.ordinal() - downgradesToApply];
+
         return rawPriorityClass;
     }
 

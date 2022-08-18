@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.taxi.orderprocessor.enums.PriorityClass;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -22,6 +23,7 @@ public class CarEntity extends BaseEntity {
 
     private String model;
 
+    @Column(unique = true)
     private String number;
 
     private String color;
