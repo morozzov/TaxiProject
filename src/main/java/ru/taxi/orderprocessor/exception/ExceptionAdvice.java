@@ -2,6 +2,7 @@ package ru.taxi.orderprocessor.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 public class ExceptionAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ConstraintViolationException.class})
+    @ExceptionHandler({ConstraintViolationException.class, DataIntegrityViolationException.class})
     @ResponseBody
     public ApiError handleConstraintException(ConstraintViolationException exception) {
         log.error("exception caught by advice {} ", exception.getMessage());
