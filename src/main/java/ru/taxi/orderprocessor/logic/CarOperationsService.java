@@ -2,18 +2,18 @@ package ru.taxi.orderprocessor.logic;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.taxi.orderprocessor.dao.CarOperationsRepository;
+import ru.taxi.orderprocessor.dao.custom.CarOperationsRepositoryCustom;
 import ru.taxi.orderprocessor.dto.CarCreateUpdateOperationDto;
 import ru.taxi.orderprocessor.dto.CarDto;
+import ru.taxi.orderprocessor.dto.FindCarsCriteria;
 import ru.taxi.orderprocessor.entity.CarEntity;
 import ru.taxi.orderprocessor.enums.PriorityClass;
 import ru.taxi.orderprocessor.mapper.CarMapper;
 
 import javax.persistence.EntityNotFoundException;
-import java.time.LocalDate;
-import java.time.Period;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -21,17 +21,14 @@ import java.time.Period;
 public class CarOperationsService {
 
     private final CarOperationsRepository repository;
+    private final CarOperationsRepositoryCustom repositoryCustom;
+    private final CarOperationsProcessor processor;
     private final CarMapper mapper;
-
-    @Value("${internal.cars.max-year}")
-    private Integer maxYear;
-    @Value("${internal.cars.offset}")
-    private Integer offset;
 
     public CarDto create(CarCreateUpdateOperationDto dto) {
         log.debug("create.in - dto: {}", dto);
         var carEntity = mapper.dtoToEntity(dto);
-        PriorityClass priorityClass = doCalculateClass(dto);
+        PriorityClass priorityClass = processor.doCalculateClass(dto);
         carEntity.setPriorityClass(priorityClass);
         log.info("create.in - calculated priority class: {}", priorityClass);
         var createdCar = repository.save(carEntity);
@@ -44,13 +41,11 @@ public class CarOperationsService {
     public CarDto update(CarCreateUpdateOperationDto dto) {
         log.debug("update.in - dto: {}", dto);
         String stateNumber = dto.getStateNumber();
-        var carEntity = repository.findByNumber(stateNumber).orElseThrow(() ->{
-            throw new EntityNotFoundException(String.format("Car with number %s not found in repository", stateNumber));
-        });
+        var carEntity = findByNumberInternal(stateNumber);
         log.info("update.in - found car record with number: {}", stateNumber);
         var entityUpdated = mapper.updateFromDto(dto, carEntity);
 
-        PriorityClass priorityClass = doCalculateClass(dto);
+        PriorityClass priorityClass = processor.doCalculateClass(dto);
         entityUpdated.setPriorityClass(priorityClass);
 
         var updatedPersisted = repository.save(entityUpdated);
@@ -60,29 +55,21 @@ public class CarOperationsService {
         return updatedPersistedDto;
     }
 
-    private PriorityClass doCalculateClass(CarCreateUpdateOperationDto dto) {
-        var between = Period.between(LocalDate.now(), dto.getIssuedAt());
-        var carAge =  between.getYears();
-        if (carAge > maxYear) {
-            throw new IllegalStateException("Exceed allowed time period for car exception!");
-        }
-
-        PriorityClass rawPriorityClass = PriorityClass.convert(dto.getCarClass());
-        Integer downgradesToApply = doCalculateDowngrades(carAge);
-
-        rawPriorityClass = downgradesToApply > rawPriorityClass.ordinal() ?
-                PriorityClass.values()[0] :
-                PriorityClass.values()[rawPriorityClass.ordinal() - downgradesToApply];
-
-        return rawPriorityClass;
+    public List<CarDto> find(FindCarsCriteria criteria) {
+        log.info("find.in - searching cars by criteria: {}", criteria);
+        List<CarEntity> carEntities = repositoryCustom.find(criteria.getCriteria(), criteria.getSort());
+        var carDtos = mapper.entityToDto(carEntities);
+        log.info("find.o - result: {}", carDtos);
+        return carDtos;
     }
 
-    private Integer doCalculateDowngrades(Integer carAge) {
-        int downgrades = carAge / offset;
-        int tail = carAge % offset;
-        if (tail == 0) {
-            downgrades -= 1;
-        }
-        return downgrades;
+    public CarDto findByNumber(String stateNumber) {
+        return mapper.entityToDto(findByNumberInternal(stateNumber));
+    }
+
+    public CarEntity findByNumberInternal(String stateNumber) {
+        return repository.findByNumber(stateNumber).orElseThrow(() ->{
+            throw new EntityNotFoundException(String.format("Car with number %s not found in registry.", stateNumber));
+        });
     }
 }

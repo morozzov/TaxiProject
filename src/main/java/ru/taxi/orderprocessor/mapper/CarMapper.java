@@ -8,6 +8,9 @@ import ru.taxi.orderprocessor.dto.CarDto;
 import ru.taxi.orderprocessor.dto.CarCreateUpdateOperationDto;
 import ru.taxi.orderprocessor.entity.CarEntity;
 
+import java.util.Collection;
+import java.util.List;
+
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CarMapper {
 
@@ -19,4 +22,6 @@ public interface CarMapper {
     CarDto entityToDto(CarEntity carEntity);
 
     CarEntity updateFromDto(CarCreateUpdateOperationDto source, @MappingTarget CarEntity target);
+
+    List<CarDto> entityToDto(Collection<CarEntity> target);
 }
