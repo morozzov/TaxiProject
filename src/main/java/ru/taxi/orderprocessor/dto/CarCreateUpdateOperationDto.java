@@ -19,7 +19,7 @@ public class CarCreateUpdateOperationDto {
     @NotNull
     private String model;
     @Pattern(regexp = "^[АВЕКМНОРСТУХ]\\d{3}(?<!000)[АВЕКМНОРСТУХ]{2}\\d{2,3}$", message = "" +
-            "Должно соответветстовать формату гос. знака РФ. А123БВ32")
+            "Must comply with the format of the state mark of the Russian Federation. (А123ВС45)")
     @NotNull
     private String stateNumber;
     @NotNull
