@@ -16,7 +16,6 @@ public class DriverEntity extends BaseEntity {
 
     private boolean terminated;
 
-
     public enum DriverStatus {
         FREE,
         ORDER_IN_PROGRESS,

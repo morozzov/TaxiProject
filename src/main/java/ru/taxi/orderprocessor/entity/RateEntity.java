@@ -6,7 +6,6 @@ public class RateEntity extends BaseEntity {
     private RateDetails rateDetails;
     private String extFeedBack;
 
-
     public enum RateDetails {
         POLITE_DRIVER,
         BEST_DRIVER,

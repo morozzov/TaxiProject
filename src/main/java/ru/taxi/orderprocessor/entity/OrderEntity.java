@@ -14,7 +14,6 @@ public class OrderEntity extends BaseEntity  {
 
     private OrderStatus status;
 
-
     public enum OrderStatus {
         CREATED,
         DRIVER_WAITING,

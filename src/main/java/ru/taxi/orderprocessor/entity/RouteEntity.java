@@ -5,7 +5,6 @@ public class RouteEntity extends BaseEntity {
     private Point from;
     private Point to;
 
-
     public static class Point {
 
         private double lat;
