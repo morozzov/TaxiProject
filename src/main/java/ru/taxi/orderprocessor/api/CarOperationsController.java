@@ -41,7 +41,7 @@ public class CarOperationsController {
     }
 
     @PostMapping("/find")
-    public List<CarDto> findCars (@Valid @RequestBody FindCarsCriteria findCarsCriteria) {
+    public List<CarDto> findCars (@RequestBody @Valid FindCarsCriteria findCarsCriteria) {
         return carOperationsService.find(findCarsCriteria);
     }
 }

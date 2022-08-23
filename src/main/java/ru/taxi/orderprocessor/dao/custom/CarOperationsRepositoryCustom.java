@@ -14,8 +14,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.swing.SortOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
@@ -32,20 +34,21 @@ public class CarOperationsRepositoryCustom {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        //add search predicates
-        ofNullable(criteria.getColor())
-                .ifPresent(option -> predicates.add(criteriaBuilder.equal(root.get("color"), option)));
-        ofNullable(criteria.getCarClass())
-                .ifPresent(option -> predicates.add(criteriaBuilder.equal(root.get("carClass"), option.name())));
-        ofNullable(criteria.getPriorityClass())
-                .ifPresent(option -> predicates.add(criteriaBuilder.equal(root.get("priorityClass"), option.name())));
-        ofNullable(criteria.getIssuedAtGreater())
-                .ifPresent(option -> predicates.add(criteriaBuilder.greaterThan(root.get("issuedAt"), option)));
-        ofNullable(criteria.getIssuedAtLower())
-                .ifPresent(option -> predicates.add(criteriaBuilder.lessThan(root.get("issuedAt"), option)));
-
+        if (criteria != null) {
+            //add search predicates
+            ofNullable(criteria.getColor())
+                    .ifPresent(option -> predicates.add(criteriaBuilder.equal(root.get("color"), option)));
+            ofNullable(criteria.getCarClass())
+                    .ifPresent(option -> predicates.add(criteriaBuilder.equal(root.get("carClass"), option)));
+            ofNullable(criteria.getPriorityClass())
+                    .ifPresent(option -> predicates.add(criteriaBuilder.equal(root.get("priorityClass"), option)));
+            ofNullable(criteria.getIssuedAtGreater())
+                    .ifPresent(option -> predicates.add(criteriaBuilder.greaterThan(root.get("issuedAt"), option)));
+            ofNullable(criteria.getIssuedAtLower())
+                    .ifPresent(option -> predicates.add(criteriaBuilder.lessThan(root.get("issuedAt"), option)));
+        }
         ofNullable(sort).ifPresent(sortingStrategy -> {
-            //todo add matcher
+            validateSort(sortingStrategy);
             if (sortingStrategy.getSortOrder().equals(SortOrder.ASCENDING)) {
                 query.orderBy(criteriaBuilder.asc(root.get(sortingStrategy.getSortBy())));
             }
@@ -53,8 +56,15 @@ public class CarOperationsRepositoryCustom {
                 query.orderBy(criteriaBuilder.desc(root.get(sortingStrategy.getSortBy())));
             }
         });
-
         query.where(predicates.toArray(new Predicate[0]));
         return entityManager.createQuery(query).getResultList();
+    }
+
+    private void validateSort(Sort sortingStrategy) {
+        boolean anyMatch = Arrays.stream(CarEntity.class.getDeclaredFields())
+                .anyMatch(field -> field.getName().equals(sortingStrategy.getSortBy()));
+        if (!anyMatch) {
+            throw new IllegalArgumentException(format("Field %s does not exist in entity!", sortingStrategy.getSortBy()));
+        }
     }
 }
