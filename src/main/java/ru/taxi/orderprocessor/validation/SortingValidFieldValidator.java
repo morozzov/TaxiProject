@@ -1,14 +1,11 @@
 package ru.taxi.orderprocessor.validation;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.taxi.orderprocessor.dto.Sort;
 import ru.taxi.orderprocessor.entity.CarEntity;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
-
-import static java.lang.String.format;
 
 @Slf4j
 public class SortingValidFieldValidator implements ConstraintValidator<ValidSortingField, Object> {
