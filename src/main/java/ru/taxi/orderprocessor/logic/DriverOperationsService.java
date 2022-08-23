@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.taxi.orderprocessor.dao.DriversOperationsRepository;
-import ru.taxi.orderprocessor.dto.CarDto;
 import ru.taxi.orderprocessor.dto.DriverDto;
 import ru.taxi.orderprocessor.entity.DriverEntity;
 import ru.taxi.orderprocessor.mapper.DriverMapper;
