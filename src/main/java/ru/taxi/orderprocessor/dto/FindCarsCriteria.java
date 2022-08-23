@@ -17,5 +17,4 @@ public class FindCarsCriteria {
     private ECriteria criteria;
     @Valid
     private Sort sort;
-
 }
