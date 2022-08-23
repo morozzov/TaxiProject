@@ -37,6 +37,11 @@ public class CarEntity extends BaseEntity {
     private PriorityClass priorityClass;
 
     public enum CarClass {
-        A, B, C, E, D, F
+        A,
+        B,
+        C,
+        E,
+        D,
+        F
     }
 }
